@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Efemérides</title>
+<meta name="theme-color" content="#2F45C5">
+<meta name="description" content="Qué pasó un día como hoy: inventos, descubrimientos, batallas y más.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#141A26; --muted:#5A6477; --line:#DDE2EC;
+  --brand:#2F45C5; --brand-ink:#FFFFFF; --soft:#E9ECF8;
+  --c-i:#0B7A85; --c-d:#7A3DC2; --c-b:#B42318; --c-n:#A8650A; --c-o:#566073;
+  --serif:"Young Serif", Georgia, "Times New Roman", serif;
+  --sans:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1220; --surface:#171C2E; --ink:#E9ECF5; --muted:#9AA4BA; --line:#2A3150;
+    --brand:#8EA0FF; --brand-ink:#0E1220; --soft:#222A4A;
+    --c-i:#4DD0DB; --c-d:#C29BFF; --c-b:#FF8A7D; --c-n:#F2B35C; --c-o:#9AA4BA;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1220; --surface:#171C2E; --ink:#E9ECF5; --muted:#9AA4BA; --line:#2A3150;
+  --brand:#8EA0FF; --brand-ink:#0E1220; --soft:#222A4A;
+  --c-i:#4DD0DB; --c-d:#C29BFF; --c-b:#FF8A7D; --c-n:#F2B35C; --c-o:#9AA4BA;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.app{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+
+/* Calendario */
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 12px 12px}
+.cal-top{display:flex;align-items:center;gap:8px;padding:0 4px 10px}
+.cal-title{flex:1;margin:0;font-family:var(--serif);font-weight:400;font-size:1.5rem;line-height:1.1;text-transform:capitalize}
+.cal-title small{font-family:var(--sans);font-size:.9rem;color:var(--muted);margin-left:6px;font-weight:500}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;display:grid;place-items:center}
+.icon-btn:hover{background:var(--soft)}
+.today-btn{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:.9rem}
+.today-btn:hover{background:var(--soft)}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dow span{text-align:center;font-size:.78rem;font-weight:600;color:var(--muted);padding:4px 0 6px}
+.day-cell{position:relative;aspect-ratio:1/1;max-height:50px;border:0;background:transparent;border-radius:14px;font-weight:500;font-size:1rem;display:grid;place-items:center}
+.day-cell:hover{background:var(--soft)}
+.day-cell.has::after{content:"";position:absolute;bottom:6px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--muted);opacity:.6}
+.day-cell.is-today{box-shadow:inset 0 0 0 2px var(--brand);font-weight:700}
+.day-cell.is-sel{background:var(--brand);color:var(--brand-ink);font-weight:700}
+.day-cell.is-sel.has::after{background:var(--brand-ink)}
+.blank{pointer-events:none}
+
+/* Día seleccionado */
+.day{display:flex;align-items:center;gap:16px;margin:26px 4px 16px}
+.bignum{font-family:var(--serif);font-size:5.2rem;line-height:.85;color:var(--brand);min-width:1.1ch}
+.day-label{margin:0;font-family:var(--serif);font-size:1.5rem;line-height:1.15;text-transform:capitalize}
+.day-meta{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+
+/* Filtros */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 4px 10px;margin:0 -16px;padding-left:20px;padding-right:20px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.92rem;font-weight:500;display:inline-flex;gap:7px;align-items:center}
+.chip .n{color:var(--muted);font-weight:600;font-size:.82rem}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.chip .dot{width:8px;height:8px;border-radius:50%}
+
+/* Lista */
+.events{list-style:none;margin:6px 0 0;padding:0}
+.ev{display:grid;grid-template-columns:4.4rem 1fr;gap:12px;padding:16px 4px;border-top:1px solid var(--line)}
+.ev:first-child{border-top:0}
+.year{font-family:var(--serif);font-size:1.35rem;line-height:1.2}
+.cat{display:flex;align-items:center;gap:7px;font-size:.85rem;font-weight:600;margin-bottom:2px}
+.cat i{width:8px;height:8px;border-radius:50%;display:block}
+.txt{margin:0;line-height:1.55}
+.fade{animation:in .22s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.empty{margin:18px 4px;padding:18px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
+.empty p{margin:0 0 12px}
+.empty button{border:0;background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:12px;font-weight:600}
+.source{margin:22px 4px 0;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="cal" aria-label="Calendario">
+    <div class="cal-top">
+      <h1 class="cal-title" id="monthTitle" aria-live="polite"></h1>
+      <button class="today-btn" id="todayBtn" type="button">Hoy</button>
+      <button class="icon-btn" id="prevBtn" type="button" aria-label="Mes anterior">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button class="icon-btn" id="nextBtn" type="button" aria-label="Mes siguiente">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="dow" aria-hidden="true"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="grid" id="grid" role="grid"></div>
+  </section>
+
+  <section class="day" aria-live="polite">
+    <div class="bignum" id="bigNum"></div>
+    <div>
+      <h2 class="day-label" id="dayLabel"></h2>
+      <p class="day-meta" id="dayMeta"></p>
+    </div>
+  </section>
+
+  <div class="chips" id="chips" role="group" aria-label="Filtrar por categoría"></div>
+  <ol class="events" id="list"></ol>
+  <p class="source" id="source"></p>
+</div>
+
+<script>
+/* ---------- Datos de muestra: "MM-DD": [[año, categoría, texto], ...] ----------
+   Categorías: i inventos · d descubrimientos · b batallas · n nacimientos · o otros */
+const D = {
+"01-01":[[1801,"d","Giuseppe Piazzi descubre Ceres, el primer objeto conocido del cinturón de asteroides."],[1959,"o","Triunfa la Revolución cubana tras la huida del dictador Fulgencio Batista."],[1999,"o","El euro entra en vigor como moneda contable en once países europeos."]],
+"03-14":[[1794,"i","Eli Whitney patenta la desmotadora de algodón."],[1879,"n","Nace Albert Einstein en Ulm, Alemania."],[2018,"o","Muere el físico Stephen Hawking en Cambridge."]],
+"04-12":[[1861,"b","Las fuerzas confederadas atacan Fort Sumter: empieza la guerra de Secesión estadounidense."],[1961,"d","Yuri Gagarin se convierte en el primer ser humano en viajar al espacio, a bordo del Vostok 1."],[1981,"d","Despega el Columbia, primera misión del transbordador espacial."]],
+"04-15":[[1452,"n","Nace Leonardo da Vinci en Vinci, Toscana."],[1707,"n","Nace el matemático Leonhard Euler en Basilea."],[1912,"o","Se hunde el Titanic en su viaje inaugural tras chocar con un iceberg."]],
+"06-06":[[1799,"n","Nace el poeta ruso Aleksandr Pushkin."],[1944,"b","Desembarco de Normandía (Día D): los Aliados inician la liberación de Europa occidental."]],
+"07-14":[[1789,"b","Toma de la Bastilla en París, inicio simbólico de la Revolución francesa."],[1965,"d","La sonda Mariner 4 envía las primeras imágenes cercanas de Marte."]],
+"07-20":[[1810,"o","Grito de Independencia en Bogotá, que impulsa la emancipación de Colombia."],[1969,"d","Neil Armstrong y Buzz Aldrin pisan la Luna con la misión Apolo 11."],[1976,"d","La sonda Viking 1 aterriza en Marte."]],
+"11-09":[[1799,"o","Napoleón Bonaparte da el golpe de Estado del 18 de brumario."],[1938,"o","Noche de los Cristales Rotos: ataques organizados contra la población judía en Alemania."],[1989,"o","Cae el Muro de Berlín."]],
+"12-17":[[1830,"o","Muere Simón Bolívar en Santa Marta, Colombia."],[1903,"i","Los hermanos Wright realizan en Kitty Hawk el primer vuelo con motor de la historia."]],
+
+"10-01":[[1890,"o","Se crea el Parque Nacional de Yosemite en California."],[1908,"i","Ford presenta el Modelo T, el automóvil que popularizó la producción en cadena."],[1924,"n","Nace Jimmy Carter, futuro presidente de Estados Unidos."],[1949,"o","Mao Zedong proclama la República Popular China."],[1958,"d","La NASA inicia oficialmente sus operaciones."],[1971,"o","Abre sus puertas Walt Disney World en Florida."]],
+"10-02":[[1835,"b","Batalla de Gonzales: comienza la guerra de independencia de Texas."],[1869,"n","Nace Mahatma Gandhi en Porbandar, India."],[1925,"i","John Logie Baird transmite las primeras imágenes de televisión en movimiento."],[1950,"o","Se publica la primera tira cómica de Peanuts (Snoopy y Charlie Brown)."]],
+"10-03":[[1863,"o","Abraham Lincoln proclama una jornada nacional de Acción de Gracias."],[1952,"o","Reino Unido prueba su primera bomba atómica en las islas Monte Bello, Australia."],[1990,"o","Alemania se reunifica tras más de cuatro décadas de división."]],
+"10-04":[[1582,"o","Con la reforma gregoriana, a este día le sigue el 15 de octubre en los países católicos."],[1830,"o","Bélgica declara su independencia de los Países Bajos."],[1883,"o","Sale de París el primer viaje del Orient Express."],[1927,"o","Comienza la talla del monumento del monte Rushmore."],[1957,"d","La Unión Soviética lanza el Sputnik 1, el primer satélite artificial."]],
+"10-05":[[1813,"b","Batalla del Támesis: muere el líder indígena Tecumseh durante la guerra de 1812."],[1882,"n","Nace Robert Goddard, pionero de los cohetes de combustible líquido."],[1962,"o","Se estrena «Agente 007 contra el Dr. No» y los Beatles publican «Love Me Do»."]],
+"10-06":[[1889,"o","Abre sus puertas el Moulin Rouge en París."],[1927,"o","Se estrena «El cantor de jazz», primer largometraje con diálogos sincronizados."],[1973,"b","Comienza la guerra de Yom Kipur entre Israel y una coalición árabe."]],
+"10-07":[[1571,"b","Batalla de Lepanto: la Liga Santa derrota a la flota otomana."],[1949,"o","Se funda la República Democrática Alemana."],[1959,"d","La sonda soviética Luna 3 fotografía por primera vez la cara oculta de la Luna."]],
+"10-08":[[1871,"o","Comienza el Gran Incendio de Chicago."],[1967,"b","Ernesto «Che» Guevara es capturado en Bolivia."],[1982,"o","Polonia prohíbe el sindicato Solidaridad."]],
+"10-09":[[1446,"i","Se promulga el Hangul, el alfabeto coreano, según la tradición."],[1604,"d","Johannes Kepler observa una supernova en la Vía Láctea, hoy conocida como SN 1604."],[1874,"o","Se funda la Unión Postal Universal en Berna."],[1940,"n","Nace John Lennon en Liverpool."],[1967,"o","Ejecutan al Che Guevara en La Higuera, Bolivia."]],
+"10-10":[[1813,"n","Nace el compositor Giuseppe Verdi."],[1846,"d","William Lassell descubre Tritón, la mayor luna de Neptuno."],[1868,"o","Grito de Yara: comienza la primera guerra de independencia de Cuba."],[1911,"o","El levantamiento de Wuchang da inicio a la revolución que acabó con el imperio chino."]],
+"10-11":[[1884,"n","Nace Eleanor Roosevelt, diplomática y activista de derechos humanos."],[1962,"o","El papa Juan XXIII inaugura el Concilio Vaticano II."],[1968,"d","Despega el Apolo 7, primera misión tripulada del programa Apolo."]],
+"10-12":[[1492,"d","Cristóbal Colón llega a América, a la isla de Guanahaní, en las Bahamas."],[1810,"o","Se casan Luis de Baviera y Teresa de Sajonia-Hildburghausen: las fiestas dan origen al Oktoberfest."],[1915,"o","Es fusilada la enfermera británica Edith Cavell por ayudar a soldados aliados a huir."],[1928,"i","Se usa por primera vez un pulmón de acero en un hospital de Boston."],[1935,"n","Nace el tenor Luciano Pavarotti en Módena."],[1964,"d","Despega el Vosjod 1, primera nave espacial con una tripulación de varias personas."],[1968,"o","Guinea Ecuatorial se independiza de España."]],
+"10-13":[[1307,"o","Felipe IV de Francia ordena arrestar a los templarios."],[1792,"o","Se coloca la primera piedra de la Casa Blanca."],[1884,"o","Una conferencia internacional elige Greenwich como meridiano de referencia mundial."],[1925,"n","Nace Margaret Thatcher, futura primera ministra británica."]],
+"10-14":[[1066,"b","Batalla de Hastings: Guillermo el Conquistador derrota a Harold II de Inglaterra."],[1890,"n","Nace Dwight D. Eisenhower, futuro presidente de Estados Unidos."],[1947,"d","Chuck Yeager rompe la barrera del sonido a bordo del Bell X-1."],[1964,"o","Martin Luther King recibe el Premio Nobel de la Paz."]],
+"10-15":[[1582,"o","Primer día del calendario gregoriano en los países que lo adoptan."],[1815,"o","Napoleón llega desterrado a la isla de Santa Elena."],[1844,"n","Nace el filósofo Friedrich Nietzsche."],[1997,"d","Se lanza la sonda Cassini-Huygens hacia Saturno."]],
+"10-16":[[1793,"o","Es guillotinada la reina María Antonieta en París."],[1846,"i","William Morton hace la primera demostración pública de anestesia con éter."],[1854,"n","Nace el escritor Oscar Wilde en Dublín."],[1978,"o","Karol Wojtyła es elegido papa con el nombre de Juan Pablo II."]],
+"10-17":[[1777,"b","Los británicos se rinden en Saratoga, un giro clave de la guerra de Independencia de EE. UU."],[1931,"o","Al Capone es condenado por evasión de impuestos."],[1989,"o","El terremoto de Loma Prieta sacude San Francisco durante la Serie Mundial."]],
+"10-18":[[1851,"o","Se publica en Londres «Moby Dick», de Herman Melville."],[1867,"o","Rusia entrega oficialmente Alaska a Estados Unidos."],[1922,"o","Se funda la British Broadcasting Company, origen de la BBC."],[1967,"d","La sonda soviética Venera 4 transmite datos desde la atmósfera de Venus."]],
+"10-19":[[1469,"o","Isabel de Castilla y Fernando de Aragón contraen matrimonio en Valladolid."],[1781,"b","Cornwallis se rinde en Yorktown, episodio decisivo de la independencia estadounidense."],[1987,"o","«Lunes Negro»: las bolsas mundiales se desploman."]],
+"10-20":[[1827,"b","Batalla de Navarino: una flota aliada destruye a la armada otomano-egipcia."],[1859,"n","Nace el filósofo John Dewey."],[1973,"o","Se inaugura la Ópera de Sídney."]],
+"10-21":[[1805,"b","Batalla de Trafalgar: Nelson derrota a la flota franco-española."],[1833,"n","Nace Alfred Nobel, inventor de la dinamita."],[1959,"o","Se inaugura el Museo Guggenheim de Nueva York."]],
+"10-22":[[1797,"i","André-Jacques Garnerin realiza el primer descenso en paracaídas sin estructura rígida."],[1962,"o","Kennedy anuncia el bloqueo naval de Cuba durante la crisis de los misiles."]],
+"10-23":[[1942,"b","Comienza la segunda batalla de El Alamein."],[1956,"o","Estalla la Revolución húngara contra el régimen soviético."]],
+"10-24":[[1648,"o","La Paz de Westfalia pone fin a la guerra de los Treinta Años."],[1861,"i","Se completa la primera línea telegráfica transcontinental de Estados Unidos."],[1929,"o","«Jueves Negro»: se desploma la bolsa de Nueva York."],[1945,"o","Entra en vigor la Carta de las Naciones Unidas."]],
+"10-25":[[1415,"b","Batalla de Azincourt: los ingleses de Enrique V vencen a los franceses."],[1854,"b","Carga de la Brigada Ligera en la batalla de Balaclava, durante la guerra de Crimea."],[1881,"n","Nace Pablo Picasso en Málaga."]],
+"10-26":[[1825,"i","Se inaugura el canal Erie, que une los Grandes Lagos con el Atlántico."],[1881,"o","Tiroteo en el O.K. Corral, en Tombstone (Arizona)."],[1994,"o","Israel y Jordania firman un tratado de paz."]],
+"10-27":[[1858,"n","Nace Theodore Roosevelt, futuro presidente de Estados Unidos."],[1904,"i","Se inaugura el metro de Nueva York."]],
+"10-28":[[312,"b","Batalla del Puente Milvio: Constantino derrota a Majencio."],[1886,"o","Se inaugura la Estatua de la Libertad en Nueva York."],[1955,"n","Nace Bill Gates, cofundador de Microsoft."],[1962,"o","Jrushchov anuncia la retirada de los misiles soviéticos de Cuba."]],
+"10-29":[[1618,"o","Es ejecutado Walter Raleigh en Londres."],[1923,"o","Se proclama la República de Turquía, con Atatürk como presidente."],[1929,"o","«Martes Negro»: nuevo desplome en Wall Street."],[1969,"i","Se envía el primer mensaje a través de ARPANET, precursora de internet."]],
+"10-30":[[1735,"n","Nace John Adams, segundo presidente de Estados Unidos."],[1938,"o","La emisión radiofónica de «La guerra de los mundos» provoca pánico en parte de la audiencia."],[1961,"o","La Unión Soviética detona la Bomba del Zar, el artefacto más potente jamás probado."]],
+"10-31":[[1517,"o","Según la tradición, Martín Lutero publica sus 95 tesis en Wittenberg."],[1926,"o","Muere el ilusionista Harry Houdini."],[1941,"o","Se concluye el monumento del monte Rushmore."],[1984,"o","Es asesinada la primera ministra india Indira Gandhi."]]
+};
+
+const CATS = {
+  i:{n:"Inventos",v:"--c-i"}, d:{n:"Descubrimientos",v:"--c-d"}, b:{n:"Batallas",v:"--c-b"},
+  n:{n:"Nacimientos",v:"--c-n"}, o:{n:"Otros hechos",v:"--c-o"}
+};
+const MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const WEEKDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+
+/* ---------- Estado ---------- */
+const today = new Date();
+let sel = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+let viewY = sel.getFullYear(), viewM = sel.getMonth();
+let filter = "all";
+let liveOK = null;           // null = sin probar, true/false tras el primer intento
+const cache = {};
+let token = 0;
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,"0");
+const keyOf = d => pad(d.getMonth()+1) + "-" + pad(d.getDate());
+const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+
+/* ---------- Datos: Wikipedia en vivo, con datos de muestra como respaldo ---------- */
+function classify(text){
+  if (/batalla|guerra|asedio|ejército|ejercito|tropas|invasi|ataque|bombardeo|rendici|combate/i.test(text)) return "b";
+  if (/invent|patent|prototipo|inaugura el primer|primer(a|o)? (tren|telégrafo|teléfono|avión|autom)/i.test(text)) return "i";
+  if (/descubr|sonda|cohete|astronauta|satélite|satelite|misión|mision|expedici|llega a|aterriza|observ/i.test(text)) return "d";
+  return "o";
+}
+async function loadLive(date){
+  const ctl = new AbortController();
+  const t = setTimeout(()=>ctl.abort(), 6000);
+  try{
+    const url = "https://es.wikipedia.org/api/rest_v1/feed/onthisday/all/" + pad(date.getMonth()+1) + "/" + pad(date.getDate());
+    const r = await fetch(url, {signal: ctl.signal});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    const ev = (j.events||[]).map(e => [e.year, classify(e.text), e.text]);
+    const bi = (j.births||[]).slice(0,8).map(e => [e.year, "n", e.text]);
+    const all = ev.concat(bi).filter(x => x[0] != null);
+    if(!all.length) throw new Error("vacío");
+    return all;
+  } finally { clearTimeout(t); }
+}
+async function getEvents(date){
+  const k = keyOf(date);
+  if(cache[k]) return cache[k];
+  let res;
+  if(liveOK !== false){
+    try{ res = {items: await loadLive(date), source:"live"}; liveOK = true; }
+    catch(e){ if(liveOK === null) liveOK = false; }
+  }
+  if(!res) res = {items: (D[k]||[]).slice(), source:"sample"};
+  res.items.sort((a,b)=>a[0]-b[0]);
+  cache[k] = res;
+  return res;
+}
+
+/* ---------- Calendario ---------- */
+function renderCalendar(){
+  $("monthTitle").innerHTML = "";
+  $("monthTitle").append(MONTHS[viewM]);
+  const s = document.createElement("small"); s.textContent = viewY; $("monthTitle").append(s);
+  const grid = $("grid"); grid.innerHTML = "";
+  const offset = (new Date(viewY, viewM, 1).getDay() + 6) % 7;
+  const days = new Date(viewY, viewM + 1, 0).getDate();
+  for(let i=0;i<offset;i++){ const b=document.createElement("span"); b.className="day-cell blank"; grid.append(b); }
+  for(let d=1; d<=days; d++){
+    const date = new Date(viewY, viewM, d);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "day-cell" + (D[keyOf(date)] ? " has" : "") + (sameDay(date,today) ? " is-today" : "") + (sameDay(date,sel) ? " is-sel" : "");
+    b.textContent = d;
+    b.setAttribute("aria-label", d + " de " + MONTHS[viewM] + (D[keyOf(date)] ? ", con efemérides" : ""));
+    if(sameDay(date,sel)) b.setAttribute("aria-current","date");
+    b.addEventListener("click", ()=>{ sel = date; filter = "all"; renderAll(); });
+    grid.append(b);
+  }
+}
+
+/* ---------- Lista ---------- */
+async function renderDay(){
+  const my = ++token;
+  $("bigNum").textContent = sel.getDate();
+  $("dayLabel").textContent = WEEKDAYS[sel.getDay()];
+  $("dayMeta").textContent = "Buscando efemérides…";
+  $("chips").innerHTML = ""; $("list").innerHTML = ""; $("source").textContent = "";
+  const {items, source} = await getEvents(sel);
+  if(my !== token) return;
+
+  const counts = {all: items.length};
+  items.forEach(x => counts[x[1]] = (counts[x[1]]||0) + 1);
+  if(filter !== "all" && !counts[filter]) filter = "all";
+
+  $("dayMeta").textContent = sel.getDate() + " de " + MONTHS[sel.getMonth()] + " de " + sel.getFullYear() +
+    (items.length ? " · " + items.length + (items.length===1 ? " efeméride" : " efemérides") : "");
+
+  const chips = $("chips");
+  if(items.length){
+    const mk = (id, label, color) => {
+      if(id !== "all" && !counts[id]) return;
+      const b = document.createElement("button");
+      b.type="button"; b.className="chip"; b.setAttribute("aria-pressed", String(filter===id));
+      if(color){ const d=document.createElement("span"); d.className="dot"; d.style.background="var("+color+")"; b.append(d); }
+      b.append(label + " ");
+      const n=document.createElement("span"); n.className="n"; n.textContent=counts[id]; b.append(n);
+      b.addEventListener("click", ()=>{ filter=id; renderDay(); });
+      chips.append(b);
+    };
+    mk("all","Todo");
+    Object.keys(CATS).forEach(k => mk(k, CATS[k].n, CATS[k].v));
+  }
+
+  const list = $("list");
+  const shown = items.filter(x => filter==="all" || x[1]===filter);
+  if(!items.length){
+    const e = document.createElement("div"); e.className="empty";
+    const p = document.createElement("p");
+    p.textContent = "Este prototipo solo incluye efemérides de muestra para algunos días. La app real las cargará de Wikipedia para cualquier fecha.";
+    e.append(p);
+    const b = document.createElement("button"); b.type="button"; b.textContent="Ver el 12 de octubre";
+    b.addEventListener("click", ()=>{ sel = new Date(today.getFullYear(), 9, 12); viewY=sel.getFullYear(); viewM=9; filter="all"; renderAll(); });
+    e.append(b); list.append(e);
+  }
+  shown.forEach(([year, c, text]) => {
+    const li = document.createElement("li"); li.className = "ev fade";
+    const y = document.createElement("div"); y.className="year"; y.textContent = year;
+    const body = document.createElement("div");
+    const cat = document.createElement("div"); cat.className="cat"; cat.style.color = "var("+CATS[c].v+")";
+    const dot = document.createElement("i"); dot.style.background = "currentColor";
+    cat.append(dot, CATS[c].n === "Otros hechos" ? "Hecho histórico" : CATS[c].n.replace(/s$/,""));
+    const p = document.createElement("p"); p.className="txt"; p.textContent = text;
+    body.append(cat, p); li.append(y, body); list.append(li);
+  });
+  $("source").textContent = source==="live"
+    ? "Fuente: Wikipedia, «Sucedió un día como hoy»."
+    : "Datos de muestra incluidos en el prototipo. En la app empaquetada se leerán en vivo de Wikipedia.";
+}
+
+function renderAll(){ renderCalendar(); renderDay(); }
+
+/* ---------- Eventos ---------- */
+$("prevBtn").addEventListener("click", ()=>{ viewM--; if(viewM<0){viewM=11;viewY--;} renderCalendar(); });
+$("nextBtn").addEventListener("click", ()=>{ viewM++; if(viewM>11){viewM=0;viewY++;} renderCalendar(); });
+$("todayBtn").addEventListener("click", ()=>{
+  sel = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  viewY = sel.getFullYear(); viewM = sel.getMonth(); filter="all"; renderAll();
+});
+
+renderAll();
+
+/* Service worker: permite instalar la app y abrirla sin conexión */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>
